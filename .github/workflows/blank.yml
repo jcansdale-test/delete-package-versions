@@ -20,7 +20,7 @@ jobs:
     - run: docker push docker.pkg.github.com/${{ github.repository }}/${{ env.IMAGE_NAME }}:0.2
     - run: docker push docker.pkg.github.com/${{ github.repository }}/${{ env.IMAGE_NAME }}:latest
 
-    - run: docker run jcansdale/gpr files ${{ github.repository }} -k ${{ secrest.GITHUB_TOKEN }}
+    - run: docker run jcansdale/gpr files ${{ github.repository }} -k ${{ secrets.GITHUB_TOKEN }}
 
     - uses: actions/delete-package-versions@v1
       with:
