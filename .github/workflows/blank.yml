@@ -1,0 +1,30 @@
+on: [push, workflow_dispatch]
+
+env:
+  IMAGE_NAME: image-to-delete
+
+jobs:
+  push-and-delete:
+    runs-on: ubuntu-latest
+
+    steps:
+    - run: docker pull alpine
+
+    - run: docker login https://docker.pkg.github.com -u token --password-stdin <<< ${{ secrest.GITHUB_TOKEN }}
+
+    - run: docker tag alpine:latest docker.pkg.github.com/${{ github.repository }}/${{ env.IMAGE_NAME }}:0.1
+    - run: docker tag alpine:latest docker.pkg.github.com/${{ github.repository }}/${{ env.IMAGE_NAME }}:0.2
+    - run: docker tag alpine:latest docker.pkg.github.com/${{ github.repository }}/${{ env.IMAGE_NAME }}:latest
+
+    - run: docker push docker.pkg.github.com/${{ github.repository }}/${{ env.IMAGE_NAME }}:0.1
+    - run: docker push docker.pkg.github.com/${{ github.repository }}/${{ env.IMAGE_NAME }}:0.2
+    - run: docker push docker.pkg.github.com/${{ github.repository }}/${{ env.IMAGE_NAME }}:latest
+
+    - run: docker run jcansdale/gpr files ${{ github.repository }} -k ${{ secrest.GITHUB_TOKEN }}
+
+    - uses: actions/delete-package-versions@v1
+      with:
+        package-name: ${{ env.IMAGE_NAME }}
+        num-old-versions-to-delete: 1
+
+    - run: docker run jcansdale/gpr files ${{ github.repository }} -k ${{ secrest.GITHUB_TOKEN }}
